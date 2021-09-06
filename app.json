@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "tdl",
+    "slug": "tdl",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "tdl"
+}
