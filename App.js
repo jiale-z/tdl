@@ -5,6 +5,30 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import Task from './components/Task';
 import { useState } from 'react';
 
+import firebase from 'firebase/app'
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+//import "firebase/auth";
+//import "firebase/database";
+//import "firebase/firestore";
+//import "firebase/functions";
+//import "firebase/storage";
+
+// Initialize Firebase
+const firebaseConfig = {
+  apiKey: 'AIzaSyBJvq5sNI3EnpW5BpuHngfPkruKloTA7Eg',
+  authDomain: "todolist-mas1.firebaseapp.com",
+  databaseURL: "https://todolist-mas1-default-rtdb.firebaseio.com",
+  projectId: "todolist-mas1",
+  storageBucket: "todolist-mas1.appspot.com",
+  messagingSenderId: "678968326247",
+  appId: "1:678968326247:web:b6732001415f28dfad3cc2",
+  measurementId: "G-JC7X5ZXM7B"
+};
+
+const app = initializeApp(firebaseConfig);
+//const analytics = getAnalytics(app);
+
 export default function App() {
   const [task, setTask] = useState();
   const [taskItems, setTaskItems] = useState([]);
