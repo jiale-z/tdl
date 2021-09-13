@@ -28,7 +28,7 @@ export default function App() {
       <ScrollView contentContainerStyle={{flexGrow: 1}} keyboardShouldPersistTaps='handled'>
       <View style={styles.tasksWrapper}>
         <Text style={styles.sectionTitle}>Today's Tasks</Text>
-        <Text style={styles.sectionTitle}>{Date().toLocaleString()} </Text>
+        <Text style={styles.sectionTitle}>{Date().toLocaleString().substring(0,15)} </Text>
 
         <View style={styles.items}>
           {/* Where the tasks will go */}
