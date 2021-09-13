@@ -1,111 +1,61 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, View, TextInput, Keyboard, ScrollView } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import Task from './components/Task';
-import { useState } from 'react';
+import 'react-native-gesture-handler';
+import React, { useEffect, useState } from 'react'
+import { firebase } from './src/firebase/config'
+import { NavigationContainer } from '@react-navigation/native'
+import { createStackNavigator } from '@react-navigation/stack'
+import { Login, Home, Registration } from './src/screens'
+import {decode, encode} from 'base-64'
+if (!global.btoa) {  global.btoa = encode }
+if (!global.atob) { global.atob = decode }
+
+const Stack = createStackNavigator();
 
 export default function App() {
-  const [task, setTask] = useState();
-  const [taskItems, setTaskItems] = useState([]);
-  
 
-  const handleAddTask = () => {
-    Keyboard.dismiss();
-    setTaskItems([...taskItems, task])
-    setTask(null);
-  }
+  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState(null)
 
-  const completeTask = (index) => {
-    let itemsCopy = [...taskItems];
-    itemsCopy.splice(index, 1);
-    setTaskItems(itemsCopy);
+  useEffect(() => {
+    const usersRef = firebase.firestore().collection('users');
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        usersRef
+          .doc(user.uid)
+          .get()
+          .then((document) => {
+            const userData = document.data()
+            setLoading(false)
+            setUser(userData)
+          })
+          .catch((error) => {
+            setLoading(false)
+          });
+      } else {
+        setLoading(false)
+      }
+    });
+  }, []);
+
+  if (loading) {
+    return (
+      <></>
+    )
   }
 
   return (
-    <View style={styles.container}>
-      {/* Page Title */}
-      <ScrollView contentContainerStyle={{flexGrow: 1}} keyboardShouldPersistTaps='handled'>
-      <View style={styles.tasksWrapper}>
-        <Text style={styles.sectionTitle}>Today's Tasks</Text>
-        <Text style={styles.sectionTitle}>{Date().toLocaleString()} </Text>
-
-        <View style={styles.items}>
-          {/* Where the tasks will go */}
-          {
-            taskItems.map((item, index) => {
-              return (
-                <TouchableOpacity key={index} onPress={() => completeTask(index)}>
-                  <Task text={item} />
-                </TouchableOpacity>
-              )
-            })
-          }
-        </View>
-      </View>
-      </ScrollView>
-
-      {/* Create new task */}
-      <View>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.writeTaskWrapper}
-        >
-            <TextInput style={styles.input} placeholder={'New Task'} value={task} onChangeText={text => setTask(text)}/>
-            <TouchableOpacity onPress={() => handleAddTask()}>
-              <View style={styles.addWrapper}>
-                <Text style={styles.addText}>+</Text>
-              </View>
-            </TouchableOpacity>
-          </KeyboardAvoidingView>
-      </View>
-
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator>
+        { user ? (
+          <Stack.Screen name="Home">
+            {props => <Home {...props} extraData={user} />}
+          </Stack.Screen>
+        ) : (
+          <>
+            <Stack.Screen name="Login" component={Login} />
+            <Stack.Screen name="Registration" component={Registration} />
+          </>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#E8EAED'
-  },
-  tasksWrapper: {
-    paddingTop: 80,
-    paddingHorizontal: 20
-  }, 
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: 'bold'
-  }, 
-  items: {
-    marginTop: 30
-  },
-  writeTaskWrapper: {
-    position: 'absolute',
-    bottom: 60,
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center'
-  },
-  input: {
-    paddingVertical: 15,
-    paddingHorizontal: 15,
-    backgroundColor: '#FFF',
-    borderRadius: 60,
-    borderColor: '#C0C0C0',
-    borderWidth: 1,
-    width: 250
-  },
-  addWrapper: {
-    width: 60,
-    height: 60,
-    backgroundColor: '#FFF',
-    borderRadius: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderColor: '#C0C0C0',
-    borderWidth: 1
-  },
-  addText: {},
-});
